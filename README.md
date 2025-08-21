@@ -4,6 +4,8 @@
 
 这是一个简单的 MCP (Model Context Protocol) 服务，提供基本的加、减、乘、除、平方根、幂运算、绝对值、自然对数和四舍五入运算。
 
+**NPM 仓库地址:** `https://www.npmjs.com/package/@zb2947244682/mcp-calculator`
+
 ## 项目功能
 
 此 MCP 服务提供了以下计算器工具：
@@ -20,9 +22,7 @@
 
 ## 如何配置到 Cursor 中
 
-要将此 MCP 服务配置到 Cursor 中，您可以将以下 JSON 片段添加到您的 `c:\Users\Jimmy\.cursor\mcp.json` 文件中 (如果该文件不存在，请创建它)。
-
-**请确保在添加前，`c:\Users\Jimmy\.cursor\mcp.json` 是一个有效的 JSON 对象。**
+将以下配置添加到您的 Cursor `mcp.json` 文件中：
 
 ```json
 {
