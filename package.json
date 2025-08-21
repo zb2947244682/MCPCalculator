@@ -1,0 +1,31 @@
+{
+  "name": "@zb2947244682/mcp-calculator",
+  "version": "1.1.1",
+  "description": "A simple MCP server for calculator operations.",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "mcp-calculator": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "mcp",
+    "calculator",
+    "tool",
+    "nodejs",
+    "model-context-protocol"
+  ],
+  "author": "zb2947244682",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "zod": "^3.23.8"
+  }
+}
