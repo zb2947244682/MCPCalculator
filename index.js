@@ -1,16 +1,36 @@
 #!/usr/bin/env node
-// 导入 MCP (Model Context Protocol) Server 和 ResourceTemplate 类，用于创建 MCP 服务和定义资源模板
+/**
+ * MCP-Calculator 计算器服务器
+ * 
+ * 这是一个功能完整的数学计算工具集，提供8个核心计算工具：
+ * 1. add - 加法运算
+ * 2. subtract - 减法运算  
+ * 3. multiply - 乘法运算
+ * 4. divide - 除法运算（带除零检查）
+ * 5. sqrt - 平方根计算（带负数检查）
+ * 6. pow - 幂运算
+ * 7. abs - 绝对值计算
+ * 8. log - 自然对数（带正数检查）
+ * 9. round - 四舍五入
+ * 
+ * 特点：
+ * - 完整的数学运算支持
+ * - 智能错误处理（除零、负数平方根等）
+ * - 支持整数和小数运算
+ * - 返回标准化的文本格式结果
+ * 
+ * 额外功能：
+ * - greeting 资源：动态问候生成器
+ * - 支持动态参数 {name} 的URI模式
+ */
+
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-// 导入 StdioServerTransport 类，用于通过标准输入/输出 (stdio) 进行通信
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-// 导入 zod 库，用于定义和验证数据 schema (输入参数的类型和结构)
 import { z } from "zod";
 
-// 创建一个 MCP 服务器实例
-// 配置服务器的名称和版本
 const server = new McpServer({
-  name: "demo-server", // 服务器名称，这里保持原有的 "demo-server" 以确保兼容性
-  version: "1.0.0"     // 服务器版本
+  name: "calculator-server", // 更准确的服务器名称
+  version: "1.0.0"
 });
 
 // 注册一个名为 "add" 的工具 (加法工具)
