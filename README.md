@@ -27,7 +27,7 @@
 ```json
 {
   // ... 其他现有配置 ...
-  "calculator-mcp": {
+  "mcp-calculator": {
     "command": "npx",
     "args": [
       "-y",
