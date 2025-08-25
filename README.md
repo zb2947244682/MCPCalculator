@@ -1,60 +1,102 @@
-# MCP Calculator Server
+# MCP Calculator 计算器服务器
 
-## 项目介绍
+这是一个基于MCP (Model Context Protocol) 官方SDK的计算器演示项目，采用模块化架构设计。
 
-这是一个简单的 MCP (Model Context Protocol) 服务，提供基本的加、减、乘、除运算，以及配置信息和计算历史记录。
+## 项目特点
 
-**NPM 仓库地址:** `https://www.npmjs.com/package/@zb2947244682/mcp-calculator`
+- **模块化架构**: 每个功能模块独立成文件，便于维护和扩展
+- **MCP规范**: 完全符合MCP官方SDK规范
+- **中文支持**: 提供中文界面和错误提示
+- **资源模板**: 支持动态URI资源访问
+- **错误处理**: 完善的错误处理和用户提示
 
-## 项目功能
+## 项目结构
 
-此 MCP 服务提供了以下功能：
-
-- **工具 (Tools):**
-  - `calculate`: 执行基本的数学运算：加法、减法、乘法、除法。
-
-- **资源 (Resources):**
-  - `config`: 提供计算器服务器的配置信息和功能说明。
-  - `calculation-history`: 查看特定运算的历史记录和示例，支持动态URI模板 `history://{operation}/{a}/{b}`。
-  - `help`: 提供 `Resource Template` 的使用帮助。
-
-- **提示词 (Prompts):**
-  - `decimal-calc`: 帮助用户进行精确的小数计算，可以指定结果的小数位数。
-
-## 如何配置到 Cursor 中
-
-将以下配置添加到您的 Cursor `mcp.json` 文件中：
-
-```json
-{
-  // ... 其他现有配置 ...
-  "mcp-calculator": {
-    "command": "npx",
-    "args": [
-      "-y",
-      "@zb2947244682/mcp-calculator@latest"
-    ]
-  }
-}
+```
+mcp-calculator/
+├── index.js              # 主入口文件，负责启动服务器
+├── registrar.js          # 注册器，管理所有组件的注册
+├── tools/                # 工具模块目录
+│   └── calculatorTool.js # 计算器工具实现
+├── resources/            # 资源模块目录
+│   ├── configResource.js # 配置资源
+│   ├── historyResource.js # 历史记录资源
+│   └── helpResource.js   # 帮助资源
+├── prompts/              # 提示词模块目录
+│   └── decimalCalcPrompt.js # 小数计算提示词
+├── utils/                # 工具方法目录
+│   ├── operationUtils.js # 数学运算工具方法
+│   └── dataUtils.js      # 数据生成工具方法
+└── README.md             # 项目说明文档
 ```
 
-# 通过 npx 运行
+## 功能模块
 
-您可以通过以下单行命令直接从命令行运行此 MCP 项目：
+### 1. 计算器工具 (calculate)
+- 支持加法、减法、乘法、除法
+- 完善的错误处理（如除零检查）
+- 中文运算符号显示
 
+### 2. 配置资源 (config://calculator)
+- 服务器基本信息
+- 支持的功能列表
+- 资源模板说明
+
+### 3. 历史记录资源 (history://{operation}/{a}/{b})
+- 动态URI模板
+- 运算历史示例
+- 运算技巧提示
+
+### 4. 帮助资源 (help://resource-templates)
+- Resource Template使用说明
+- 详细的使用示例
+
+### 5. 小数计算提示词 (decimal-calc)
+- 支持指定小数位数
+- 详细的计算步骤指导
+
+## 使用方法
+
+### 启动服务器
 ```bash
-npx @zb2947244682/mcp-calculator@latest
+node index.js
 ```
 
-## 本地开发配置
+### 在MCP Inspector中测试
+1. 启动MCP Inspector
+2. 连接到计算器服务器
+3. 测试各种工具和资源
 
-如果您在本地开发环境中使用，可以将以下配置添加到您的 Cursor `mcp.json` 文件中：
+## 模块化设计优势
 
-```json
-{
-  "mcp-calculator": {
-    "command": "node",
-    "args": ["D:\\Codes\\MCPRepo\\mcp-calculator\\index.js"]
-  }
-}
-```
+1. **可维护性**: 每个功能独立，修改不影响其他模块
+2. **可扩展性**: 新增功能只需添加新模块，无需修改现有代码
+3. **可测试性**: 每个模块可以独立测试
+4. **代码复用**: 工具方法可以在多个模块间共享
+5. **团队协作**: 不同开发者可以并行开发不同模块
+
+## 开发指南
+
+### 添加新工具
+1. 在 `tools/` 目录下创建新文件
+2. 定义工具配置和处理函数
+3. 在 `registrar.js` 中注册新工具
+
+### 添加新资源
+1. 在 `resources/` 目录下创建新文件
+2. 定义资源配置和处理函数
+3. 在 `registrar.js` 中注册新资源
+
+### 添加新提示词
+1. 在 `prompts/` 目录下创建新文件
+2. 定义提示词配置和处理函数
+3. 在 `registrar.js` 中注册新提示词
+
+## 依赖项
+
+- `@modelcontextprotocol/sdk`: MCP官方SDK
+- `zod`: 数据验证库
+
+## 许可证
+
+MIT License
