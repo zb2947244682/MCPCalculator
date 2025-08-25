@@ -1,6 +1,6 @@
 {
   "name": "@zb2947244682/mcp-calculator",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "一个简单的MCP服务器，提供计算器运算功能",
   "homepage": "https://www.npmjs.com/~zb2947244682",
   "repository": {
