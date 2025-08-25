@@ -195,4 +195,4 @@ const transport = new StdioServerTransport();
 // await 确保在连接建立完成后才继续执行后续代码 (例如打印日志)
 await server.connect(transport);
 // 连接成功后打印日志，表示服务器已在运行
-console.log("MCP已启动");
+//console.log("MCP已启动");
