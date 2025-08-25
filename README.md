@@ -31,7 +31,7 @@
     "command": "npx",
     "args": [
       "-y",
-      "@zb2947244682/mcp-calculator"
+      "@zb2947244682/mcp-calculator@latest"
     ]
   }
 }
