@@ -2,197 +2,255 @@
 /**
  * MCP-Calculator 计算器服务器
  * 
- * 这是一个功能完整的数学计算工具集，提供8个核心计算工具：
- * 1. add - 加法运算
- * 2. subtract - 减法运算  
- * 3. multiply - 乘法运算
- * 4. divide - 除法运算（带除零检查）
- * 5. sqrt - 平方根计算（带负数检查）
- * 6. pow - 幂运算
- * 7. abs - 绝对值计算
- * 8. log - 自然对数（带正数检查）
- * 9. round - 四舍五入
+ * 这是一个简单的MCP演示项目，包含：
+ * 1. 一个计算工具 (calculate) - 支持基本数学运算
+ * 2. 一个配置资源 (config) - 提供计算器配置信息
+ * 3. 一个小数计算提示词 (decimal-calc) - 帮助用户进行小数计算
  * 
  * 特点：
- * - 完整的数学运算支持
- * - 智能错误处理（除零、负数平方根等）
- * - 支持整数和小数运算
- * - 返回标准化的文本格式结果
- * 
- * 额外功能：
- * - greeting 资源：动态问候生成器
- * - 支持动态参数 {name} 的URI模式
+ * - 语法完全符合MCP官方SDK规范
+ * - 简单易懂的代码结构
+ * - 适合学习和演示使用
  */
 
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
+// 创建MCP服务器实例
 const server = new McpServer({
-  name: "calculator-server", // 更准确的服务器名称
+  name: "calculator-server",
   version: "1.0.0"
 });
 
-// 注册一个名为 "add" 的工具 (加法工具)
-server.registerTool("add",
+// 注册计算工具
+server.registerTool(
+  "calculate",
   {
-    title: "Addition Tool",         // 工具在 UI 中显示的标题
-    description: "Add two numbers", // 工具的描述
-    inputSchema: { a: z.number(), b: z.number() } // 定义工具的输入参数 schema，使用 zod 进行类型验证
-  },
-  // 工具的处理函数，当工具被调用时执行
-  // 接收解构的参数 { a, b }
-  async ({ a, b }) => ({
-    // 返回一个包含结果内容的对象
-    content: [{ type: "text", text: String(a + b) }] // 结果以文本形式返回
-  })
-);
-
-// 注册一个名为 "subtract" 的工具 (减法工具)
-server.registerTool("subtract",
-  {
-    title: "Subtract Tool",
-    description: "Subtract two numbers",
-    inputSchema: { a: z.number(), b: z.number() }
-  },
-  async ({ a, b }) => ({
-    content: [{ type: "text", text: String(a - b) }]
-  })
-);
-
-// 注册一个名为 "multiply" 的工具 (乘法工具)
-server.registerTool("multiply",
-  {
-    title: "Multiply Tool",
-    description: "Multiply two numbers",
-    inputSchema: { a: z.number(), b: z.number() }
-  },
-  async ({ a, b }) => ({
-    content: [{ type: "text", text: String(a * b) }]
-  })
-);
-
-// 注册一个名为 "divide" 的工具 (除法工具)
-server.registerTool("divide",
-  {
-    title: "Divide Tool",
-    description: "Divide two numbers",
-    inputSchema: { a: z.number(), b: z.number() }
-  },
-  async ({ a, b }) => {
-    // 处理除数为零的情况，返回错误信息
-    if (b === 0) {
-      return {
-        content: [{ type: "text", text: "Error: Division by zero" }], // 错误消息
-        isError: true                                             // 标记为错误响应
-      };
+    title: "数学计算器",
+    description: "执行基本的数学运算：加法、减法、乘法、除法",
+    inputSchema: {
+      operation: z.enum(["add", "subtract", "multiply", "divide"]).describe("运算类型：add(加法), subtract(减法), multiply(乘法), divide(除法)"),
+      a: z.coerce.number().describe("第一个数字"),
+      b: z.coerce.number().describe("第二个数字")
     }
-    // 返回计算结果
-    return {
-      content: [{ type: "text", text: String(a / b) }]
-    };
-  }
-);
-
-// 注册一个名为 "sqrt" 的工具 (平方根工具)
-server.registerTool("sqrt",
-  {
-    title: "Square Root Tool",
-    description: "Calculate the square root of a number",
-    inputSchema: { a: z.number() }
   },
-  async ({ a }) => {
-    if (a < 0) {
+  async ({ operation, a, b }) => {
+    let result;
+    let isError = false;
+    let errorMessage = "";
+
+    try {
+      switch (operation) {
+        case "add":
+          result = a + b;
+          break;
+        case "subtract":
+          result = a - b;
+          break;
+        case "multiply":
+          result = a * b;
+          break;
+        case "divide":
+          if (b === 0) {
+            isError = true;
+            errorMessage = "错误：除数不能为零";
+          } else {
+            result = a / b;
+          }
+          break;
+        default:
+          isError = true;
+          errorMessage = `错误：未知的运算类型 "${operation}"，请使用：add(加法), subtract(减法), multiply(乘法), divide(除法)`;
+      }
+    } catch (error) {
+      isError = true;
+      errorMessage = `计算错误：${error.message}`;
+    }
+
+    if (isError) {
       return {
-        content: [{ type: "text", text: "Error: Cannot calculate square root of a negative number" }],
+        content: [{ type: "text", text: errorMessage }],
         isError: true
       };
     }
+
+    // 将英文操作符转换为中文显示
+    const operationNames = {
+      "add": "加",
+      "subtract": "减", 
+      "multiply": "乘",
+      "divide": "除"
+    };
+    
     return {
-      content: [{ type: "text", text: String(Math.sqrt(a)) }]
+      content: [{ type: "text", text: `${a} ${operationNames[operation]} ${b} = ${result}` }]
     };
   }
 );
 
-// 注册一个名为 "pow" 的工具 (幂运算工具)
-server.registerTool("pow",
-  {
-    title: "Power Tool",
-    description: "Calculate the power of a base number raised to an exponent",
-    inputSchema: { base: z.number(), exponent: z.number() }
-  },
-  async ({ base, exponent }) => ({
-    content: [{ type: "text", text: String(Math.pow(base, exponent)) }]
-  })
-);
-
-// 注册一个名为 "abs" 的工具 (绝对值工具)
-server.registerTool("abs",
-  {
-    title: "Absolute Value Tool",
-    description: "Calculate the absolute value of a number",
-    inputSchema: { a: z.number() }
-  },
-  async ({ a }) => ({
-    content: [{ type: "text", text: String(Math.abs(a)) }]
-  })
-);
-
-// 注册一个名为 "log" 的工具 (自然对数工具)
-server.registerTool("log",
-  {
-    title: "Natural Logarithm Tool",
-    description: "Calculate the natural logarithm (base e) of a number",
-    inputSchema: { a: z.number() }
-  },
-  async ({ a }) => {
-    if (a <= 0) {
-      return {
-        content: [{ type: "text", text: "Error: Logarithm input must be positive" }],
-        isError: true
-      };
-    }
-    return {
-      content: [{ type: "text", text: String(Math.log(a)) }]
-    };
-  }
-);
-
-// 注册一个名为 "round" 的工具 (四舍五入工具)
-server.registerTool("round",
-  {
-    title: "Round Tool",
-    description: "Round a number to the nearest integer",
-    inputSchema: { a: z.number() }
-  },
-  async ({ a }) => ({
-    content: [{ type: "text", text: String(Math.round(a)) }]
-  })
-);
-
-// 注册一个名为 "greeting" 的资源 (问候资源)
-// ResourceTemplate 定义了资源的 URI 模式，这里是动态的 {name} 参数
+// 注册配置资源
 server.registerResource(
-  "greeting",
-  new ResourceTemplate("greeting://{name}", { list: undefined }),
+  "config",
+  "config://calculator",
   {
-    title: "Greeting Resource",      // 资源在 UI 中显示的标题
-    description: "Dynamic greeting generator" // 资源的描述
+    title: "计算器配置信息",
+    description: "计算器服务器的配置信息和功能说明",
+    mimeType: "application/json"
   },
-  // 资源的处理函数，当资源被请求时执行
-  // 接收 URI 和解构的参数 { name }
-  async (uri, { name }) => ({
+  async (uri) => ({
     contents: [{
-      uri: uri.href,                 // 返回资源的完整 URI
-      text: `Hello, ${name}!`      // 返回资源的内容
+      uri: uri.href,
+      text: JSON.stringify({
+        serverName: "MCP 计算器服务器",
+        version: "1.0.0",
+        supportedOperations: ["add", "subtract", "multiply", "divide"],
+        maxPrecision: 10,
+        features: ["基础算术运算", "错误处理", "JSON输出"],
+        resourceTemplates: {
+          "计算历史记录": {
+            uri: "history://{operation}/{a}/{b}",
+            description: "查看特定运算的历史记录和示例",
+            parameters: {
+              operation: "运算类型：add(加法), subtract(减法), multiply(乘法), divide(除法)",
+              a: "第一个数字",
+              b: "第二个数字"
+            },
+            examples: [
+              "history://add/5/3 - 查看5+3的加法历史",
+              "history://multiply/10/2 - 查看10×2的乘法历史",
+              "history://divide/15/4 - 查看15÷4的除法历史"
+            ]
+          }
+        }
+      }, null, 2)
     }]
   })
 );
 
-// 创建一个 StdioServerTransport 实例
+// 注册动态计算历史资源（使用Resource Template）
+server.registerResource(
+  "calculation-history",
+  new ResourceTemplate("history://{operation}/{a}/{b}", { 
+    list: undefined,
+    complete: {
+      operation: (value) => {
+        return ["add", "subtract", "multiply", "divide"].filter(op => op.startsWith(value));
+      }
+    }
+  }),
+  {
+    title: "计算历史记录",
+    description: "查看特定运算的历史记录和示例。URI格式：history://{运算类型}/{数字1}/{数字2}",
+    mimeType: "application/json"
+  },
+  async (uri, { operation, a, b }) => {
+    // 将英文操作符转换为中文
+    const operationNames = {
+      "add": "加法",
+      "subtract": "减法", 
+      "multiply": "乘法",
+      "divide": "除法"
+    };
+    
+    // 模拟计算历史数据
+    const historyData = {
+      operation: operation,
+      operationName: operationNames[operation] || operation,
+      numbers: [Number(a), Number(b)],
+      examples: [
+        { a: 5, b: 3, result: operation === "add" ? 8 : operation === "subtract" ? 2 : operation === "multiply" ? 15 : 1.67 },
+        { a: 10, b: 2, result: operation === "add" ? 12 : operation === "subtract" ? 8 : operation === "multiply" ? 20 : 5 },
+        { a: 15, b: 4, result: operation === "add" ? 19 : operation === "subtract" ? 11 : operation === "multiply" ? 60 : 3.75 }
+      ],
+      tips: {
+        "add": "加法运算，结果总是大于或等于较大的加数",
+        "subtract": "减法运算，注意被减数要大于减数",
+        "multiply": "乘法运算，正数相乘结果为正，负数相乘结果为正",
+        "divide": "除法运算，除数不能为零，注意小数结果"
+      }
+    };
+    
+    return {
+      contents: [{
+        uri: uri.href,
+        text: JSON.stringify(historyData, null, 2)
+      }]
+    };
+  }
+);
+
+// 注册帮助资源（说明如何使用Resource Template）
+server.registerResource(
+  "help",
+  "help://resource-templates",
+  {
+    title: "Resource Template 使用帮助",
+    description: "详细说明如何使用动态资源模板",
+    mimeType: "text/plain"
+  },
+  async (uri) => ({
+    contents: [{
+      uri: uri.href,
+      text: `Resource Template 使用说明
+=======================
+
+1. 计算历史记录 (calculation-history)
+   URI模板: history://{operation}/{a}/{b}
+   
+   参数说明:
+   - {operation}: 运算类型
+     * add = 加法
+     * subtract = 减法  
+     * multiply = 乘法
+     * divide = 除法
+   - {a}: 第一个数字
+   - {b}: 第二个数字
+   
+   使用示例:
+   - history://add/5/3     (查看5+3的加法历史)
+   - history://multiply/10/2 (查看10×2的乘法历史)
+   - history://divide/15/4   (查看15÷4的除法历史)
+   
+   返回内容:
+   - 运算类型和名称
+   - 输入的数字
+   - 相关计算示例
+   - 运算技巧提示
+
+2. 如何访问:
+   在MCP Inspector中，点击Resources标签，然后输入完整的URI即可。
+   例如: history://add/5/3
+`
+    }]
+  })
+);
+
+// 注册小数计算提示词
+server.registerPrompt(
+  "decimal-calc",
+  {
+    title: "小数计算助手",
+    description: "帮助用户进行精确的小数计算，可以指定结果的小数位数",
+    argsSchema: {
+      precision: z.coerce.number().min(0).max(10).describe("结果的小数位数（0-10位）"),
+      operation: z.string().describe("要计算的数学表达式，比如：3.14 + 2.86")
+    }
+  },
+  ({ precision, operation }) => ({
+    messages: [{
+      role: "user",
+      content: {
+        type: "text",
+        text: `请帮我计算以下数学表达式：${operation}\n\n要求：结果保留 ${precision} 位小数，请提供详细的计算步骤和最终结果。`
+      }
+    }]
+  })
+);
+
+// 创建传输层并连接服务器
 const transport = new StdioServerTransport();
-// 将 MCP 服务器连接到传输层
-// await 确保在连接建立完成后才继续执行后续代码 (例如打印日志)
 await server.connect(transport);
-// 连接成功后打印日志，表示服务器已在运行
-//console.log("MCP已启动");
+
+// 服务器启动完成
+// console.log("MCP Calculator Server is running...");
